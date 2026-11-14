@@ -1,0 +1,22 @@
+[Unit]
+Description=Modbus TCP proxy TEST instance (for UI tests only, remove afterwards)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=modbusproxy
+Group=modbusproxy
+# test hook: a device named "FAILTEST" in the config makes the start fail (rollback test)
+ExecStartPre=/bin/sh -c '! grep -q FAILTEST /etc/modbus-proxy-test.yml'
+ExecStart=/usr/local/bin/modbus-proxy-rs -c /etc/modbus-proxy-test.yml
+Restart=always
+RestartSec=5
+Environment=RUST_LOG=error
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6

@@ -1,0 +1,26 @@
+[Unit]
+Description=Modbus proxy web UI TEST instance (port 8081, test proxy only, remove afterwards)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=modbusui
+Group=modbusui
+SupplementaryGroups=systemd-journal
+ExecStart=/usr/local/bin/modbusui -listen :8081 -proxy-config /etc/modbus-proxy-test.yml -proxy-unit modbus-proxy-test.service -apply-path-unit modbusui-test-apply.path -state-dir /var/lib/modbusui-test -password-file /etc/modbusui-test/password
+Restart=always
+RestartSec=30
+StandardOutput=null
+StandardError=null
+LogLevelMax=notice
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/modbusui-test/spool
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

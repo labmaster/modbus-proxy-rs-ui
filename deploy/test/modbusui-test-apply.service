@@ -1,0 +1,12 @@
+[Unit]
+Description=Modbus proxy web UI TEST instance: execute request (root, test proxy only)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/modbusui -apply -proxy-config /etc/modbus-proxy-test.yml -proxy-unit modbus-proxy-test.service -state-dir /var/lib/modbusui-test
+TimeoutStartSec=180
+StandardOutput=null
+StandardError=null
+LogLevelMax=notice
+PrivateTmp=true
+ProtectHome=true

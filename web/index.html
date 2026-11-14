@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modbus Proxy</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+
+<!-- Login -->
+<section id="login" class="login hidden">
+  <form id="loginForm" class="card login-card">
+    <h1>Modbus Proxy</h1>
+    <p class="muted">Management of the Modbus TCP proxy</p>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" required autofocus>
+    <p id="loginMsg" class="msg-error hidden"></p>
+    <button class="btn btn-primary" type="submit">Log in</button>
+    <details class="pw-help">
+      <summary>Forgot password?</summary>
+      <p>The password is not stored in readable form anywhere, only as a hash. You can set a new one at any time
+        as root on the server running modbusui:</p>
+      <pre class="pre">modbusui -set-password</pre>
+      <p>The old password is not needed. The new one is effective immediately.</p>
+    </details>
+  </form>
+</section>
+
+<!-- App -->
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div class="brand">Modbus Proxy</div>
+    <div id="statusPill" class="pill">…</div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="devices" class="active">Devices</button>
+      <button data-tab="service">Service</button>
+      <button data-tab="conns">Connections</button>
+      <button data-tab="test">Test query</button>
+      <button data-tab="system">System</button>
+    </nav>
+    <button id="logoutBtn" class="btn btn-small">Log out</button>
+  </header>
+
+  <main>
+    <!-- Devices -->
+    <section id="tab-devices" class="tab">
+      <div class="head-row">
+        <h2>Devices</h2>
+        <button id="addDevice" class="btn btn-primary">+ Add device</button>
+      </div>
+      <div id="devProblem" class="box box-warn hidden"></div>
+      <div class="table-wrap">
+        <table class="table" id="devTable">
+          <thead><tr>
+            <th>Name</th><th>Target (IP:port)</th><th>Proxy port</th><th>Timeout</th><th>Clients</th><th></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="muted small">Changes take effect only after “Save”. Saving restarts the proxy once; if it does not start cleanly with the new config, the old one is restored automatically.</p>
+      <div id="saveBar" class="savebar hidden">
+        <span id="saveInfo"></span>
+        <span class="spacer"></span>
+        <button id="discardBtn" class="btn">Discard</button>
+        <button id="saveBtn" class="btn btn-primary">Save &amp; restart proxy</button>
+      </div>
+    </section>
+
+    <!-- Service -->
+    <section id="tab-service" class="tab hidden">
+      <h2>Service</h2>
+      <div class="grid2">
+        <div class="card">
+          <h3>Proxy <span class="muted small" id="svcUnit"></span></h3>
+          <dl class="kv" id="svcInfo"></dl>
+          <div class="btn-row">
+            <button class="btn" data-svc="start">Start</button>
+            <button class="btn" data-svc="restart">Restart</button>
+            <button class="btn btn-danger" data-svc="stop">Stop</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Request handler</h3>
+          <p class="muted small">The web UI has no root privileges. Save, start and stop go through <code>modbus-proxy-apply.path</code>, which triggers a root unit.</p>
+          <dl class="kv" id="pathInfo"></dl>
+          <h3>Last job</h3>
+          <dl class="kv" id="lastJob"></dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- Connections -->
+    <section id="tab-conns" class="tab hidden">
+      <div class="head-row">
+        <h2>Connections</h2>
+        <span class="muted small" id="connTime"></span>
+      </div>
+      <div class="table-wrap">
+        <table class="table" id="connTable">
+          <thead><tr><th>Device</th><th>Proxy port</th><th>Listening</th><th>Connected clients</th><th>Proxy → device</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <h3>All listening ports</h3>
+      <div class="table-wrap">
+        <table class="table" id="listenTable">
+          <thead><tr><th>Port</th><th>Address</th><th>Owner</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="muted small">Refreshed every 3 seconds while this page is open.</p>
+    </section>
+
+    <!-- Test query -->
+    <section id="tab-test" class="tab hidden">
+      <h2>Modbus test query</h2>
+      <form id="testForm" class="card test-form">
+        <label class="tf-device">Device
+          <select id="tPort" required></select>
+        </label>
+        <div class="tf-fields">
+          <label>Slave ID
+            <input id="tUnit" type="number" min="0" max="255" value="1" required>
+          </label>
+          <label class="tf-fc">Function
+            <select id="tFc">
+              <option value="3">FC03 – Holding registers</option>
+              <option value="4">FC04 – Input registers</option>
+            </select>
+          </label>
+          <label>Start register
+            <input id="tAddr" type="text" value="0" required autocomplete="off">
+            <span class="hint" id="tAddrHint">decimal or 0x…</span>
+          </label>
+          <label>Count
+            <input id="tCount" type="number" min="1" max="125" value="2" required>
+            <span class="hint">1–125 registers</span>
+          </label>
+          <label>Timeout (ms)
+            <input id="tTimeout" type="number" min="100" max="15000" step="100" value="3000" required>
+          </label>
+        </div>
+        <div class="tf-actions">
+          <button class="btn btn-primary" type="submit" id="tSubmit">Query</button>
+          <span class="muted small">The query goes through the proxy port like any other client and does not interrupt anything.</span>
+        </div>
+      </form>
+      <div id="testResult"></div>
+    </section>
+
+    <!-- System -->
+    <section id="tab-system" class="tab hidden">
+      <div class="head-row">
+        <h2>System</h2>
+        <button id="sysRefresh" class="btn btn-small">Refresh</button>
+      </div>
+      <div id="sysContent"><p class="muted">Loading …</p></div>
+    </section>
+  </main>
+</div>
+
+<!-- Edit device -->
+<dialog id="devDlg">
+  <form id="devForm" method="dialog" class="dlg">
+    <h3 id="devDlgTitle">Device</h3>
+    <label>Name <span class="muted small">(written as a comment into the config)</span>
+      <input name="name" type="text" maxlength="100" required>
+      <span class="field-err" data-for="name"></span>
+    </label>
+    <div class="row2">
+      <label>Device IP
+        <input name="host" type="text" inputmode="decimal" placeholder="192.168.1.x" required>
+        <span class="field-err" data-for="host"></span>
+      </label>
+      <label>Device port
+        <input name="port" type="number" min="1" max="65535" value="502" required>
+        <span class="field-err" data-for="port"></span>
+      </label>
+    </div>
+    <div class="row2">
+      <label>Proxy port <span class="muted small">(suggestion: 502 + last two digits of the IP)</span>
+        <input name="listenPort" type="number" min="1024" max="65535" required>
+        <span class="field-err" data-for="listenPort"></span>
+      </label>
+      <label>Timeout (seconds)
+        <input name="timeout" type="number" min="1" max="60" value="5" required>
+        <span class="field-err" data-for="timeout"></span>
+      </label>
+    </div>
+    <div class="btn-row end">
+      <button type="button" class="btn" id="devCancel">Cancel</button>
+      <button type="submit" class="btn btn-primary">Apply</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Confirmation -->
+<dialog id="confirmDlg">
+  <div class="dlg">
+    <h3 id="confirmTitle"></h3>
+    <p id="confirmText"></p>
+    <div class="btn-row end">
+      <button class="btn" id="confirmNo">Cancel</button>
+      <button class="btn btn-primary" id="confirmYes">OK</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Job progress -->
+<dialog id="jobDlg">
+  <div class="dlg">
+    <h3 id="jobTitle">Job</h3>
+    <div class="job-state"><span id="jobSpinner" class="spinner"></span><span id="jobMsg"></span></div>
+    <pre id="jobDetail" class="pre hidden"></pre>
+    <div class="btn-row end">
+      <button class="btn hidden" id="jobCancel">Withdraw job</button>
+      <button class="btn btn-primary" id="jobClose" disabled>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast" class="toast hidden"></div>
+</body>
+</html>

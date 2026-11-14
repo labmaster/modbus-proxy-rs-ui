@@ -1,0 +1,15 @@
+[Unit]
+Description=Modbus proxy web UI: execute request (root)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/modbusui -apply
+TimeoutStartSec=180
+
+# no logs
+StandardOutput=null
+StandardError=null
+LogLevelMax=notice
+
+PrivateTmp=true
+ProtectHome=true

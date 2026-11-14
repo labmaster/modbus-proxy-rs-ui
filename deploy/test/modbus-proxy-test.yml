@@ -1,0 +1,14 @@
+devices:
+# Test device A (TEST-NET, UI test only)
+- modbus:
+    url: 192.0.2.1:502
+    timeout: 2
+  listen:
+    bind: 0:50291
+
+# Test device B (TEST-NET, UI test only)
+- modbus:
+    url: 192.0.2.2:502
+    timeout: 2
+  listen:
+    bind: 0:50292

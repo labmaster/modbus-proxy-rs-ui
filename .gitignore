@@ -1,0 +1,4 @@
+/dist/
+/modbusui
+*.exe
+__pycache__/

@@ -1,0 +1,6 @@
+[Unit]
+Description=Modbus proxy web UI TEST instance: pick up requests
+
+[Path]
+PathExists=/var/lib/modbusui-test/spool/request.json
+Unit=modbusui-test-apply.service

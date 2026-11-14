@@ -1,0 +1,9 @@
+[Unit]
+Description=Modbus proxy web UI: pick up requests
+
+[Path]
+PathExists=/var/lib/modbusui/spool/request.json
+Unit=modbus-proxy-apply.service
+
+[Install]
+WantedBy=paths.target
