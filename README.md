@@ -8,13 +8,16 @@ A small, self-contained web UI to manage [modbus-proxy-rs](https://github.com/ti
 - **Safe saving**: backup → replace config → restart proxy → automatic rollback if it fails to start.
 - Ready-made binaries for **x86-64, ARM64 and ARMv7**, one-command installer.
 
+![Devices page](docs/screenshots/devices.png)
+
 **Contents**
 
 1. [Features](#features)
-2. [Quick start – install the ready-made release](#quick-start--install-the-ready-made-release)
-3. [Operation](#operation)
-4. [Building it yourself](#building-it-yourself)
-5. [Reference](#reference) – how it works, security, config format, command line, API, code, tests
+2. [Screenshots](#screenshots)
+3. [Quick start – install the ready-made release](#quick-start--install-the-ready-made-release)
+4. [Operation](#operation)
+5. [Building it yourself](#building-it-yourself)
+6. [Reference](#reference) – how it works, security, config format, command line, API, code, tests
 
 ---
 
@@ -38,6 +41,23 @@ A small, self-contained web UI to manage [modbus-proxy-rs](https://github.com/ti
 - without a change the proxy is **not** restarted
 
 The proxy port suggestion is `502` + the last two digits of the device IP (`.109` → `50209`); it can be overridden.
+
+---
+
+## Screenshots
+
+All screenshots show sample data in the dark theme; the UI follows the light/dark setting of the browser. Click an image for the full size.
+
+| | |
+|---|---|
+| **Devices** – list with connected clients | **Edit device** – with live validation |
+| [![Devices](docs/screenshots/devices.png)](docs/screenshots/devices.png) | [![Edit device](docs/screenshots/devices-edit.png)](docs/screenshots/devices-edit.png) |
+| **Service** – status, start / stop / restart, last job | **Connections** – clients with hostnames, listening ports |
+| [![Service](docs/screenshots/service.png)](docs/screenshots/service.png) | [![Connections](docs/screenshots/connections.png)](docs/screenshots/connections.png) |
+| **Test query** – Modbus FC03/FC04 with decoded values | **System** – disk, journal, memory, password hint |
+| [![Test query](docs/screenshots/test-query.png)](docs/screenshots/test-query.png) | [![System](docs/screenshots/system.png)](docs/screenshots/system.png) |
+| **Login** | |
+| [![Login](docs/screenshots/login.png)](docs/screenshots/login.png) | |
 
 ---
 
@@ -354,6 +374,7 @@ All paths except `/api/session` and `/api/login` need a valid session; writing r
 ├── config_test.go   unit tests
 ├── web/             index.html, style.css, app.js (embedded)
 ├── deploy/          systemd units; test/ = test instance and automatic test
+├── docs/            screenshots for this README
 ├── install.sh       installer (release archive or source tree)
 ├── build.sh         builds the release archives (Linux/macOS/Git Bash) …
 ├── build.ps1        … the same for Windows PowerShell
