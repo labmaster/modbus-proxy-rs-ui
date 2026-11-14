@@ -399,6 +399,10 @@ While it runs, the test UI is at `http://<server-ip>:8081/` (password in `/root/
 
 ---
 
+## Contributing
+
+This project is provided as is. Issues and pull requests are disabled. If you need changes, fork the repository and adapt it to your needs – everything required to build it yourself is included (see [Building it yourself](#building-it-yourself)).
+
 ## License
 
 MIT – see [LICENSE](LICENSE).
